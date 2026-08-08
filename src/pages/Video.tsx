@@ -16,7 +16,7 @@ export default function Video() {
       </PageHeader>
 
       <section className="mx-auto max-w-4xl px-5 pb-24">
-        <VideoEmbed />
+        <VideoEmbed src="/demo.mp4" />
       </section>
     </div>
   );
