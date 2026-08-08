@@ -1,70 +1,78 @@
 import PageHeader from "../components/PageHeader";
-import { bmcBlocks } from "../data/bmc";
-
-// Standard 9-block BMC grid placement (CSS grid areas for the classic layout)
-const layout = [
-  "partnerships partnerships activities value value relationships relationships segments segments",
-  "partnerships partnerships resources value value channels channels segments segments",
-  "costs costs costs costs costs revenue revenue revenue revenue",
-];
+import DisclaimerBanner from "../components/DisclaimerBanner";
+import { bmcBlocks, bmcMission, bmcSubtitle, type BmcBlock } from "../data/bmc";
 
 export default function BusinessModel() {
-  const byId = Object.fromEntries(bmcBlocks.map((b) => [b.id, b]));
+  const wideBlocks = bmcBlocks.filter((b) => b.wide);
+  const gridBlocks = bmcBlocks.filter((b) => !b.wide);
 
   return (
     <div>
-      <PageHeader
-        eyebrow="Strategy"
-        title="Business Model Canvas"
-        subtitle="Structure only — most blocks await team input. Nothing here is finalized pricing, partnerships, or market sizing."
-      />
+      <PageHeader eyebrow="Strategy" title="Business Model Canvas" subtitle={bmcSubtitle}>
+        <div className="mt-6 max-w-2xl">
+          <DisclaimerBanner compact />
+        </div>
+      </PageHeader>
 
-      <section className="mx-auto max-w-6xl px-5 pb-24">
-        {/* Desktop grid */}
-        <div
-          className="hidden gap-3 md:grid"
-          style={{
-            gridTemplateColumns: "repeat(9, minmax(0, 1fr))",
-            gridTemplateRows: "repeat(3, auto)",
-            gridTemplateAreas: layout.map((row) => `"${row}"`).join(" "),
-          }}
-        >
-          {bmcBlocks.map((b) => (
-            <div key={b.id} style={{ gridArea: b.id }}>
-              <BmcCell block={byId[b.id]} />
-            </div>
+      <section className="mx-auto max-w-6xl px-5 pb-16">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {gridBlocks.map((b) => (
+            <BmcCard key={b.id} block={b} />
           ))}
         </div>
 
-        {/* Mobile stacked */}
-        <div className="grid grid-cols-1 gap-3 md:hidden">
-          {bmcBlocks.map((b) => (
-            <BmcCell key={b.id} block={b} />
-          ))}
-        </div>
+        {wideBlocks.map((b) => (
+          <div key={b.id} className="mt-4">
+            <BmcCard block={b} />
+          </div>
+        ))}
+
+        <p className="mt-10 text-center text-sm italic text-slate-400">
+          Our mission: {bmcMission}
+        </p>
       </section>
     </div>
   );
 }
 
-function BmcCell({ block }: { block: (typeof bmcBlocks)[number] }) {
+function BmcCard({ block }: { block: BmcBlock }) {
   return (
-    <div className="flex h-full min-h-[150px] flex-col rounded-xl border border-white/10 bg-white/[0.03] p-4">
-      <h3 className="text-sm font-semibold text-amber-300">{block.title}</h3>
-      {block.content ? (
-        <ul className="mt-2 space-y-1.5 text-sm text-slate-300">
-          {block.content.map((line) => (
-            <li key={line} className="leading-snug">
-              {line}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-2 text-sm italic text-slate-500">Needs team input.</p>
+    <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+      <div className="flex items-baseline gap-2">
+        <span className="text-xs font-mono text-teal-300/60">
+          {String(block.number).padStart(2, "0")}
+        </span>
+        <h3 className="text-sm font-semibold text-amber-300">{block.title}</h3>
+      </div>
+
+      {block.intro && (
+        <p className="mt-3 text-sm leading-relaxed text-slate-300">{block.intro}</p>
       )}
-      {block.seedNote && (
-        <p className="mt-auto pt-3 text-xs leading-snug text-teal-300/60">{block.seedNote}</p>
-      )}
+
+      <div
+        className={
+          block.wide
+            ? "mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
+            : "mt-4 space-y-4"
+        }
+      >
+        {block.sections.map((section, i) => (
+          <div key={section.heading ?? i}>
+            {section.heading && (
+              <p className="text-xs font-medium uppercase tracking-wide text-teal-300/70">
+                {section.heading}
+              </p>
+            )}
+            <ul className={`space-y-1.5 text-sm text-slate-300 ${section.heading ? "mt-2" : ""}`}>
+              {section.items.map((item) => (
+                <li key={item} className="leading-snug">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
